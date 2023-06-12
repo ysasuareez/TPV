@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_web_client_id" translatable="false">117449274889-6fe9drv28oh10sjed1f3ohuve6f115dk.apps.googleusercontent.com</string>
+    <string name="gcm_defaultSenderId" translatable="false">117449274889</string>
+    <string name="google_api_key" translatable="false">AIzaSyAReJE6Tn637NPiwACXj1RTGhH3uT9CZm0</string>
+    <string name="google_app_id" translatable="false">1:117449274889:android:22e70f267ab5844d396ad8</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAReJE6Tn637NPiwACXj1RTGhH3uT9CZm0</string>
+    <string name="google_storage_bucket" translatable="false">pdahospitality-7dfa0.appspot.com</string>
+    <string name="project_id" translatable="false">pdahospitality-7dfa0</string>
+</resources>
