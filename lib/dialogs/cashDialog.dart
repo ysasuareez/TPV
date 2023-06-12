@@ -1,14 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:restaurante/services/firebase_service.dart';
 
-import '../models/firebase/customTable.dart';
+import '../models/customTable.dart';
+import '../utils/botonera.dart';
 
+/// Interactive dialogue for the user to quickly access the total amount to be
+/// paid by the customer, enter the received money, and in turn, get the change
+/// without the need for calculations. If the user enters an amount less than
+/// required, the bill cannot be collected, and therefore, the dialogue will
+/// not disappear.
 class CashDialog extends StatefulWidget {
+  /// It contains the following properties:
+  /// cobrarAction: which is a callback function
+  ///  to be executed when the payment is completed
+  final void Function() cobrarAction;
+
+  /// table: which represents the table.
   final CustomTable table;
 
   const CashDialog({
     Key? key,
     required this.table,
+    required this.cobrarAction,
   }) : super(key: key);
 
   @override
@@ -16,15 +28,13 @@ class CashDialog extends StatefulWidget {
 }
 
 class _CashPaymentDialogState extends State<CashDialog> {
+  /// It contains a TextEditingController named _cashController to handle the
+  /// input for the cash amount. The cashValue variable represents the amount of
+  /// cash entered by the user, and the changeValue variable represents the
+  /// calculated change.
   final TextEditingController _cashController = TextEditingController();
   double cashValue = 0.0;
   double changeValue = 0.0;
-
-  void calculateChange() {
-    setState(() {
-      cashValue = double.tryParse(_cashController.text) ?? 0.0;
-    });
-  }
 
   @override
   void initState() {
@@ -34,6 +44,8 @@ class _CashPaymentDialogState extends State<CashDialog> {
     super.initState();
   }
 
+  ///The dispose method is overridden to dispose of the _cashController when the
+  ///state is disposed. This is important to avoid memory leaks.
   @override
   void dispose() {
     _cashController.dispose();
@@ -57,12 +69,15 @@ class _CashPaymentDialogState extends State<CashDialog> {
             ),
             child: Padding(
               padding: const EdgeInsets.only(left: 75.0, right: 75),
+
+              ///The dialog layout is divided into two parts using a Row
               child: Row(
                 children: [
+                  ///The left part contains information about the table and the total amount to be paid
                   Container(
                     width: 600,
                     height: 800,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: Colors.white,
                     ),
                     child: Column(
@@ -99,8 +114,8 @@ class _CashPaymentDialogState extends State<CashDialog> {
                         const SizedBox(height: 20),
                         Container(
                           height: 120,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFBDEEDC),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFBDEEDC),
                           ),
                           child: Padding(
                             padding:
@@ -117,7 +132,7 @@ class _CashPaymentDialogState extends State<CashDialog> {
                                 ),
                                 Text(
                                   '${widget.table.getTotalAmount().toStringAsFixed(2)}€',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 45,
                                   ),
@@ -128,15 +143,15 @@ class _CashPaymentDialogState extends State<CashDialog> {
                         ),
                         Container(
                           height: 120,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF5DDAAD),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF5DDAAD),
                           ),
                           child: Padding(
                             padding:
                                 const EdgeInsets.only(left: 30.0, right: 30),
                             child: Stack(
                               children: [
-                                Positioned(
+                                const Positioned(
                                   right: 372,
                                   top: 35,
                                   bottom: 0,
@@ -154,7 +169,7 @@ class _CashPaymentDialogState extends State<CashDialog> {
                                     readOnly: true,
                                     onChanged: (_) => calculateChange(),
                                     textAlign: TextAlign.right,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 45,
                                     ),
@@ -170,8 +185,8 @@ class _CashPaymentDialogState extends State<CashDialog> {
                         ),
                         Container(
                           height: 120,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFDA71FF),
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFDA71FF),
                           ),
                           child: Padding(
                             padding:
@@ -189,7 +204,7 @@ class _CashPaymentDialogState extends State<CashDialog> {
                                 ),
                                 Text(
                                   '${(cashValue == 0 ? 0.0 : cashValue - widget.table.getTotalAmount()).toStringAsFixed(2)}€',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 45,
                                     color: Colors.black,
@@ -208,8 +223,8 @@ class _CashPaymentDialogState extends State<CashDialog> {
                                 Navigator.pop(context);
                               },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFFFFE1B8),
-                                minimumSize: Size(290, 100),
+                                backgroundColor: const Color(0xFFFFE1B8),
+                                minimumSize: const Size(290, 100),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -228,10 +243,7 @@ class _CashPaymentDialogState extends State<CashDialog> {
                                 if ((cashValue -
                                         widget.table.getTotalAmount()) >=
                                     0) {
-                                  deleteTable(widget.table.firebaseId);
-                                  print(widget.table.firebaseId);
-                                  Navigator.pop(context);
-                                  Navigator.pop(context);
+                                  widget.cobrarAction();
                                 }
                               },
                               style: ElevatedButton.styleFrom(
@@ -254,9 +266,11 @@ class _CashPaymentDialogState extends State<CashDialog> {
                       ],
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     width: 50,
                   ),
+
+                  /// The right part is a Numeric keypad
                   Padding(
                     padding: const EdgeInsets.only(top: 70),
                     child: Container(
@@ -266,45 +280,16 @@ class _CashPaymentDialogState extends State<CashDialog> {
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.5),
-                            offset: Offset(0, 3),
+                            offset: const Offset(0, 3),
                           ),
                         ],
                       ),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              buildNumericButton('1', Color(0xFFB0D5FF)),
-                              buildNumericButton('2', Color(0xFF3D8BE7)),
-                              buildNumericButton('3', Color(0xFFB0D5FF)),
-                            ],
-                          ),
-                          SizedBox(height: 2.0),
-                          Row(
-                            children: [
-                              buildNumericButton('4', Color(0xFF3D8BE7)),
-                              buildNumericButton('5', Color(0xFFB0D5FF)),
-                              buildNumericButton('6', Color(0xFF3D8BE7)),
-                            ],
-                          ),
-                          SizedBox(height: 2.0),
-                          Row(
-                            children: [
-                              buildNumericButton('7', Color(0xFFB0D5FF)),
-                              buildNumericButton('8', Color(0xFF3D8BE7)),
-                              buildNumericButton('9', Color(0xFFB0D5FF)),
-                            ],
-                          ),
-                          SizedBox(height: 2.0),
-                          Row(
-                            children: [
-                              buildActionButton('D', Icons.arrow_back),
-                              buildNumericButton('0', Color(0xFFB0D5FF)),
-                              buildNumericButton('.', Color(0xFF3D8BE7)),
-                            ],
-                          ),
-                          SizedBox(height: 2.0),
-                        ],
+                      child: Botonera(
+                        pinController: _cashController,
+                        goToMapaPage: (() {}),
+                        text: '.',
+                        w: 200,
+                        h: 150,
                       ),
                     ),
                   ),
@@ -318,64 +303,12 @@ class _CashPaymentDialogState extends State<CashDialog> {
     );
   }
 
-  Widget buildNumericButton(String label, Color backgroundColor) {
-    return Container(
-      width: 200,
-      height: 150,
-      child: ElevatedButton(
-        onPressed: () {
-          _cashController.text += label;
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            fontSize: 90,
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget buildActionButton(String label, IconData iconData) {
-    return Container(
-      width: 200,
-      height: 150,
-      decoration: BoxDecoration(
-        color: Colors.blue,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Center(
-        child: GestureDetector(
-          onTap: () {
-            if (label == 'D' && _cashController.text.isNotEmpty) {
-              _cashController.text = _cashController.text
-                  .substring(0, _cashController.text.length - 1);
-            } else if (label == 'S') {
-              //CALCULAR VUELTA
-            }
-          },
-          child: Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white,
-            ),
-            child: Center(
-              child: Icon(
-                iconData,
-                color: Colors.blue,
-                size: 50,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  /// This method is called whenever the cash input changes. It updates the cashValue
+  /// by parsing the text from the _cashController. If the parsing fails, it sets
+  /// the cashValue to 0.0.
+  void calculateChange() {
+    setState(() {
+      cashValue = double.tryParse(_cashController.text) ?? 0.0;
+    });
   }
 }

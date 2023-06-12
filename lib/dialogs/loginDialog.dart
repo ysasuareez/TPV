@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
+/// Represents a dialog from a login page in a funny way.
 class LoginDialog extends StatefulWidget {
+  /// It has for required parameters:
+  /// closeAction: A callback function that will be invoked when the dialog is closed.
   final void Function() closeAction;
+
+  /// texto1, texto2 and t: Strings that represent the text content of the dialog.
   final String texto1;
   final String texto2;
   final String texto3;
@@ -49,7 +54,7 @@ class _LoginDialogState extends State<LoginDialog> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
-                        color: Color(0xFF7B7B7B),
+                        color: const Color(0xFF7B7B7B),
                         width: 2,
                       ),
                     ),
@@ -57,7 +62,7 @@ class _LoginDialogState extends State<LoginDialog> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          '${widget.texto1}',
+                          widget.texto1,
                           style: const TextStyle(
                             fontSize: 40,
                             color: Colors.black,
@@ -65,9 +70,9 @@ class _LoginDialogState extends State<LoginDialog> {
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 30),
                         Text(
-                          '${widget.texto2}',
+                          widget.texto2,
                           style: const TextStyle(
                             fontSize: 40,
                             color: Color(0xFF7B7B7B),
@@ -79,19 +84,19 @@ class _LoginDialogState extends State<LoginDialog> {
                     ),
                   ),
                 ),
-                SizedBox(height: 50),
+                const SizedBox(height: 50),
                 ElevatedButton(
                   onPressed: () {
                     widget.closeAction();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFFFD056),
-                    minimumSize: Size(540, 100),
+                    backgroundColor: const Color(0xFFFFD056),
+                    minimumSize: const Size(540, 100),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'OIDO COCINA!',
                     style: TextStyle(
                       fontSize: 40,
@@ -99,10 +104,10 @@ class _LoginDialogState extends State<LoginDialog> {
                     ),
                   ),
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Text(
-                  '${widget.texto3}',
-                  style: TextStyle(
+                  widget.texto3,
+                  style: const TextStyle(
                     fontFamily: 'Nunito',
                     fontSize: 20,
                     color: Colors.black,

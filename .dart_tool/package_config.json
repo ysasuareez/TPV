@@ -116,6 +116,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "flutter_native_timezone",
+      "rootUri": "file:///C:/Users/msuar/flutter/.pub-cache/hosted/pub.dartlang.org/flutter_native_timezone-2.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "flutter_test",
       "rootUri": "file:///C:/Users/msuar/flutter/packages/flutter_test",
       "packageUri": "lib/",
@@ -136,6 +142,12 @@
     {
       "name": "http_parser",
       "rootUri": "file:///C:/Users/msuar/flutter/.pub-cache/hosted/pub.dartlang.org/http_parser-4.0.2",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "intl",
+      "rootUri": "file:///C:/Users/msuar/flutter/.pub-cache/hosted/pub.dartlang.org/intl-0.18.1",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
@@ -242,7 +254,7 @@
       "languageVersion": "2.18"
     }
   ],
-  "generated": "2023-06-06T21:57:02.211629Z",
+  "generated": "2023-06-11T23:58:20.103057Z",
   "generator": "pub",
   "generatorVersion": "2.18.5"
 }

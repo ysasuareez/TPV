@@ -1,4 +1,4 @@
-import 'item.dart';
+import '../item.dart';
 
 /// Modelo de una subcategoría
 /// Las categorías almacenan subcategorías que a su vez almacenan los items

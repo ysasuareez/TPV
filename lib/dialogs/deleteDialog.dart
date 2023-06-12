@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 
+///Represents a dialog for confirming the deletion of a command.
 class DeleteDialog extends StatefulWidget {
-  final void Function() closeAction;
-  final void Function() buttonAction;
-  final String texto1;
-  final String texto2;
-  final String texto3;
+  /// It contains the following properties:
+  ///It has a required afirmativeAction parameter, which is a callback function
+  ///that will be called when the user confirms the deletion.
+  final void Function() afirmativeAction;
 
-  const DeleteDialog(
-      {Key? key,
-      required this.closeAction,
-      required this.texto1,
-      required this.texto2,
-      required this.texto3,
-      required this.buttonAction})
-      : super(key: key);
+  const DeleteDialog({
+    Key? key,
+    required this.afirmativeAction,
+  }) : super(key: key);
 
   @override
   State<DeleteDialog> createState() => _DeleteDialogState();
@@ -39,11 +35,11 @@ class _DeleteDialogState extends State<DeleteDialog> {
               children: [
                 const SizedBox(height: 45),
                 Image.asset(
-                  'lib/assets/images/goodbye_marron.jpg',
-                  width: 350,
-                  height: 350,
+                  'lib/assets/images/basura.jpg',
+                  width: 600,
+                  height: 370,
                 ),
-                const SizedBox(height: 45),
+                const SizedBox(height: 20),
                 Padding(
                   padding: const EdgeInsets.only(left: 150.0, right: 150),
                   child: Container(
@@ -52,17 +48,18 @@ class _DeleteDialogState extends State<DeleteDialog> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
-                        color: Color(0xFF7B7B7B),
+                        color: const Color(0xFF7B7B7B),
                         width: 2,
                       ),
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
+                      children: const [
                         Text(
-                          '${widget.texto1}',
-                          style: const TextStyle(
-                            fontSize: 40,
+                          '¡CUIDADO JEFE!',
+                          style: TextStyle(
+                            fontSize: 50,
+                            fontWeight: FontWeight.bold,
                             color: Colors.black,
                             fontFamily: 'Nunito',
                           ),
@@ -70,10 +67,10 @@ class _DeleteDialogState extends State<DeleteDialog> {
                         ),
                         SizedBox(height: 30),
                         Text(
-                          '${widget.texto2}',
-                          style: const TextStyle(
+                          'ESTÁS A PUNTO DE\nELIMINAR UNA COMANDA',
+                          style: TextStyle(
                             fontSize: 40,
-                            color: Color(0xFF7B7B7B),
+                            color: Colors.black,
                             fontFamily: 'Nunito',
                           ),
                           textAlign: TextAlign.center,
@@ -82,39 +79,55 @@ class _DeleteDialogState extends State<DeleteDialog> {
                     ),
                   ),
                 ),
-                SizedBox(height: 50),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      widget.buttonAction();
-                      widget.closeAction();
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Color(0xFFFFD056),
-                    minimumSize: Size(540, 100),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+                const SizedBox(height: 50),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Close the dialog
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFD056),
+                        minimumSize: const Size(295, 100),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'CANCELAR',
+                        style: TextStyle(
+                          fontSize: 40,
+                          color: Color(0xFF5C5C5C),
+                        ),
+                      ),
                     ),
-                  ),
-                  child: Text(
-                    'OIDO COCINA!',
-                    style: TextStyle(
-                      fontSize: 40,
-                      color: Color(0xFF5C5C5C),
+                    const SizedBox(width: 15),
+                    // Calls the afirmativeAction callback provided through the
+                    // DeleteDialog widget
+                    ElevatedButton(
+                      onPressed: () {
+                        widget.afirmativeAction();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFD056),
+                        minimumSize: const Size(295, 100),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: const Text(
+                        'CONTINUAR',
+                        style: TextStyle(
+                          fontSize: 40,
+                          color: Color(0xFF5C5C5C),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
-                SizedBox(height: 10),
-                Text(
-                  '${widget.texto3}',
-                  style: TextStyle(
-                    fontFamily: 'Nunito',
-                    fontSize: 20,
-                    color: Colors.black,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
+                const SizedBox(height: 10),
               ],
             ),
           )),

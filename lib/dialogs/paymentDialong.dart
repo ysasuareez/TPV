@@ -1,14 +1,28 @@
 import 'package:flutter/material.dart';
 
-import '../models/firebase/customTable.dart';
-import 'cashDialog.dart';
+import '../models/customTable.dart';
 
+/// Represents a dialog for selecting a payment method.
 class PaymentDialog extends StatefulWidget {
+  /// It contains the following properties:
+  /// cardAction: A callback function that will be invoked when the "TARJETA"
+  /// (CARD) button is pressed.
   final void Function() cardAction;
 
+  /// cashAction: A callback function that will be invoked when the "EFECTIVO"
+  /// (CASH) button is pressed.
+  final void Function() cashAction;
+
+  /// table: An instance of the CustomTable model that represents the
+  /// tabletable: An instance of the CustomTable model that represents the
+  /// table information.
   final CustomTable table;
 
-  const PaymentDialog({Key? key, required this.cardAction, required this.table})
+  const PaymentDialog(
+      {Key? key,
+      required this.cardAction,
+      required this.table,
+      required this.cashAction})
       : super(key: key);
 
   @override
@@ -105,13 +119,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     const SizedBox(width: 15),
                     ElevatedButton(
                       onPressed: () {
-                        // Acción cuando se selecciona 'EFECTIVO'
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) => CashDialog(
-                            table: widget.table,
-                          ),
-                        );
+                        widget.cashAction();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFD056),

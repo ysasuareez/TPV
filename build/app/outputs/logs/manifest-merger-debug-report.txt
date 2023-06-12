@@ -42,6 +42,7 @@ MERGED from C:\Users\msuar\flutter-workspace\TPV\android\app\src\main\AndroidMan
 MERGED from [:firebase_database] C:\Users\msuar\flutter-workspace\TPV\build\firebase_database\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-17:12
 MERGED from [:cloud_firestore] C:\Users\msuar\flutter-workspace\TPV\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-17:12
 MERGED from [:firebase_core] C:\Users\msuar\flutter-workspace\TPV\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-17:12
+MERGED from [:flutter_native_timezone] C:\Users\msuar\flutter-workspace\TPV\build\flutter_native_timezone\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-9:12
 MERGED from [androidx.multidex:multidex:2.0.0] C:\Users\msuar\.gradle\caches\transforms-3\9b5ed12f6582dffc2bd6a766d557bec6\transformed\multidex-2.0.0\AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.window:window-java:1.0.0-beta04] C:\Users\msuar\.gradle\caches\transforms-3\21b26ef90e71324700151bde7e8603b7\transformed\jetified-window-java-1.0.0-beta04\AndroidManifest.xml:17:1-23:12
 MERGED from [androidx.window:window:1.0.0-beta04] C:\Users\msuar\.gradle\caches\transforms-3\e1f53c96aa78f7b42431169b7cd59214\transformed\jetified-window-1.0.0-beta04\AndroidManifest.xml:17:1-33:12
@@ -99,6 +100,8 @@ MERGED from [:cloud_firestore] C:\Users\msuar\flutter-workspace\TPV\build\cloud_
 MERGED from [:cloud_firestore] C:\Users\msuar\flutter-workspace\TPV\build\cloud_firestore\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:firebase_core] C:\Users\msuar\flutter-workspace\TPV\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [:firebase_core] C:\Users\msuar\flutter-workspace\TPV\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:flutter_native_timezone] C:\Users\msuar\flutter-workspace\TPV\build\flutter_native_timezone\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
+MERGED from [:flutter_native_timezone] C:\Users\msuar\flutter-workspace\TPV\build\flutter_native_timezone\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-7:41
 MERGED from [androidx.multidex:multidex:2.0.0] C:\Users\msuar\.gradle\caches\transforms-3\9b5ed12f6582dffc2bd6a766d557bec6\transformed\multidex-2.0.0\AndroidManifest.xml:20:5-43
 MERGED from [androidx.multidex:multidex:2.0.0] C:\Users\msuar\.gradle\caches\transforms-3\9b5ed12f6582dffc2bd6a766d557bec6\transformed\multidex-2.0.0\AndroidManifest.xml:20:5-43
 MERGED from [androidx.window:window-java:1.0.0-beta04] C:\Users\msuar\.gradle\caches\transforms-3\21b26ef90e71324700151bde7e8603b7\transformed\jetified-window-java-1.0.0-beta04\AndroidManifest.xml:19:5-21:41

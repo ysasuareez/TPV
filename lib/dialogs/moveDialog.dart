@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
 
+/// Represents a dialog for moving an item or performing an action.
 class MoveDialog extends StatefulWidget {
+  /// It contains the following properties:
+  /// noAction and yesAction: two callbacks functios that will be invoked when the user press
+  /// the button YES or NO.
   final void Function() noAction;
   final void Function() yesAction;
+
+  /// textoAUX and texto1: string that represents additional text content
+  /// for the dialog and a string that represents the main text content
+  /// for the dialog.
   final String textoAUX;
   final String texto1;
 
@@ -50,7 +58,7 @@ class _MoveDialogState extends State<MoveDialog> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
-                        color: Color(0xFF7B7B7B),
+                        color: const Color(0xFF7B7B7B),
                         width: 2,
                       ),
                     ),
@@ -58,7 +66,7 @@ class _MoveDialogState extends State<MoveDialog> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          '${widget.texto1}',
+                          widget.texto1,
                           style: const TextStyle(
                             fontSize: 35,
                             color: Colors.black,
@@ -68,7 +76,7 @@ class _MoveDialogState extends State<MoveDialog> {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          '${widget.textoAUX}',
+                          widget.textoAUX,
                           style: const TextStyle(
                             fontSize: 35,
                             color: Colors.black,
@@ -107,8 +115,8 @@ class _MoveDialogState extends State<MoveDialog> {
                         widget.noAction();
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFFFFE1B8),
-                        minimumSize: Size(295, 100),
+                        backgroundColor: const Color(0xFFFFE1B8),
+                        minimumSize: const Size(295, 100),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),

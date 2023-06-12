@@ -1,12 +1,17 @@
+import 'dart:math';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:restaurante/firebase_options.dart';
+import 'package:restaurante/pages/bbdd_page.dart';
+import 'package:restaurante/pages/employees_page.dart';
 import 'package:restaurante/pages/login_page.dart';
 import 'package:restaurante/pages/mapa_page.dart';
 import 'package:restaurante/pages/order_page.dart';
-
-import 'models/firebase/customTable.dart';
-import 'models/firebase/employe.dart';
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:intl/intl.dart';
+import 'models/customTable.dart';
 
 void main() async {
   // Inicia Firebase
@@ -14,7 +19,11 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  String timeZone = await FlutterNativeTimezone.getLocalTimezone();
+  Intl.defaultLocale = 'es_ES';
+  initializeDateFormatting(timeZone).then((_) {
+    runApp(MyApp());
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -26,7 +35,6 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _currentPage = 'login';
-  Employee? _selectedEmployee;
   CustomTable? _table;
 
   void _goToLoginPage() {
@@ -48,6 +56,18 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _goToBBDDPage() {
+    setState(() {
+      _currentPage = 'bbdd';
+    });
+  }
+
+  void _goToEmployeesPage() {
+    setState(() {
+      _currentPage = 'employees';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget body;
@@ -57,14 +77,26 @@ class _MyAppState extends State<MyApp> {
         break;
       case 'mapa':
         body = MapaPage(
-          goToOrdersPage: _goToOrderPage,
+          goToOrderPage: _goToOrderPage,
+          goToLoginPage: _goToLoginPage,
+          goToBBDDPage: _goToBBDDPage,
+          goToEmployeesPage: _goToEmployeesPage,
         );
         break;
       case 'orders':
         body = OrdersPage(
-          table: _table!,
+            table: _table!,
+            goToMapaPage: _goToMapaPage,
+            goToOrderPage: _goToOrderPage);
+        break;
+      case 'bbdd':
+        body = BBDDPage(
           goToMapaPage: _goToMapaPage,
-          goToOrderPage: _goToOrderPage,
+        );
+        break;
+      case 'employees':
+        body = EmployeesPage(
+          goToMapaPage: _goToMapaPage,
         );
         break;
       default:
@@ -78,6 +110,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
+          toolbarHeight: 0,
           automaticallyImplyLeading: false,
           title: const Text(
             'BELYNDAS',

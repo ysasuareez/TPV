@@ -1,22 +1,39 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:restaurante/dialogs/deleteDialog.dart';
-import 'package:restaurante/pages/order_page.dart';
+import 'package:restaurante/dialogs/byeDialog.dart';
 import 'package:restaurante/services/firebase_service.dart';
 
+import '../dialogs/cashDialog.dart';
+import '../dialogs/deleteDialog.dart';
+import '../dialogs/settingsDialog copy.dart';
 import '../dialogs/warningDialog.dart';
 import '../dialogs/moveDialog.dart';
 import '../dialogs/paymentDialong.dart';
-import '../models/firebase/customTable.dart';
-import '../models/firebase/employe.dart';
+import '../models/customTable.dart';
 
+/// Represents a Flutter page called "MapaPage", which displays a map of tables
+/// in a restaurant.
 class MapaPage extends StatefulWidget {
-  final void Function(CustomTable) goToOrdersPage;
+  /// It contains the following properties:
+  /// A function that navigates to the order page.
+  final void Function(CustomTable) goToOrderPage;
+
+  ///  A function that navigates to the login page.
+  final void Function() goToLoginPage;
+
+  ///  A function that navigates to the database page.
+  final void Function() goToBBDDPage;
+
+  /// A function that navigates to the employees page.
+  final void Function() goToEmployeesPage;
 
   const MapaPage({
     Key? key,
-    required this.goToOrdersPage,
+    required this.goToOrderPage,
+    required this.goToLoginPage,
+    required this.goToBBDDPage,
+    required this.goToEmployeesPage,
   }) : super(key: key);
   @override
   MapaPageState createState() => MapaPageState();
@@ -26,22 +43,37 @@ class MapaPageState extends State<MapaPage> {
   @override
   void initState() {
     super.initState();
-    reload();
   }
 
+  /// A Timer object used for scheduling a periodic callback
   Timer? timer;
+
+  /// A string variable representing the text to display on a button for
+  ///selecting tables.
   var textBottonSelec = 'SELECCIONAR';
+
+  /// A string variable representing the text to display on a button for
+  ///moving tables.
   var textBottonMove = 'MOVER';
+
+  /// A boolean variable indicating whether tables can be selected.
   bool canSelectTable = false;
+
+  /// A boolean variable indicating whether tables can be moved.
   bool canMoveTable = false;
+
+  /// A list of CustomTable objects representing the selected tables.
   final List<CustomTable> selectedTablesList = [];
+
+  /// A list of CustomTable objects representing the tables with billed orders.
   List<CustomTable> billedOutTableList = [];
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _pinController = TextEditingController();
-  late CustomTable selectedTable;
+
+  /// A list of CustomTable objects representing the tables for which payment is due.
+  List<CustomTable> toGetPaymentTableList = [];
 
   @override
   Widget build(BuildContext context) {
+    reload();
     return Scaffold(
       body: Stack(
         children: [
@@ -58,7 +90,8 @@ class MapaPageState extends State<MapaPage> {
             child: Row(
               children: [
                 Padding(
-                  padding: const EdgeInsets.all(15.0),
+                  padding: const EdgeInsets.only(
+                      top: 15.0, bottom: 15, left: 40, right: 15),
                   child: Container(
                     width: 1670,
                     height: 1434,
@@ -76,7 +109,7 @@ class MapaPageState extends State<MapaPage> {
                           ),
                         ),
                       ),
-                      buildMesas(),
+                      buildPositionTables(),
                       //  buildTerraza(),
                     ]),
                   ),
@@ -95,7 +128,7 @@ class MapaPageState extends State<MapaPage> {
                         ElevatedButton(
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(
-                                const Color(0xFF3D8BE7)),
+                                const Color.fromARGB(255, 201, 106, 235)),
                           ),
                           onPressed: () {
                             resetBotonSelect();
@@ -103,7 +136,7 @@ class MapaPageState extends State<MapaPage> {
                           },
                           child: SizedBox(
                             width: 290,
-                            height: 190,
+                            height: 225,
                             child: Align(
                               child: Text(
                                 textBottonSelec,
@@ -125,6 +158,9 @@ class MapaPageState extends State<MapaPage> {
                               billedOutTableList = selectedTablesList
                                   .where((t) => t.orders.isNotEmpty)
                                   .toList();
+                              for (var t in billedOutTableList) {
+                                updateIsBilledOut(t, 'true');
+                              }
                               setState(() {
                                 resetBotonSelect();
                               });
@@ -134,7 +170,7 @@ class MapaPageState extends State<MapaPage> {
                           },
                           child: const SizedBox(
                             width: 290,
-                            height: 190,
+                            height: 225,
                             child: Align(
                               child: Text(
                                 'IMPR CUENTA',
@@ -153,34 +189,33 @@ class MapaPageState extends State<MapaPage> {
                           ),
                           onPressed: () async {
                             if (selectedTablesList.isNotEmpty) {
-                              await showDialog(
+                              showDialog(
                                   context: context,
                                   builder: (context) => DeleteDialog(
-                                        closeAction: () =>
-                                            Navigator.pop(context),
-                                        buttonAction: () async {
+                                        afirmativeAction: () async {
                                           for (var t in selectedTablesList) {
-                                            deleteTable(t.firebaseId);
+                                            await updateTable(t, 'eliminada');
+
                                             billedOutTableList.removeWhere(
                                                 (nt) => nt.id == t.id);
+
+                                            await closeTable(
+                                              t,
+                                            );
                                           }
+                                          setState(() {
+                                            Navigator.pop(context);
+                                            resetBotonSelect();
+                                          });
                                         },
-                                        texto1:
-                                            'SIEMPRE DE LAS GRACIAS A NUESTROS CLIENTES...',
-                                        texto2: 'SI DEJAN PROPINA',
-                                        texto3:
-                                            'Asegúrese de que se han ido para blasfemar',
                                       ));
-                              setState(() {
-                                resetBotonSelect();
-                              });
                             } else {
                               showWarningDialog();
                             }
                           },
                           child: const SizedBox(
                             width: 290,
-                            height: 190,
+                            height: 225,
                             child: Align(
                               child: Text(
                                 'ELIMINAR',
@@ -201,24 +236,12 @@ class MapaPageState extends State<MapaPage> {
                             if (selectedTablesList.isNotEmpty &&
                                 selectedTablesList
                                     .any((nt) => nt.orders.isNotEmpty)) {
-                              List<CustomTable> toGetPaymentTableList =
-                                  selectedTablesList
-                                      .where((nt) => nt.orders.isNotEmpty)
-                                      .toList();
+                              toGetPaymentTableList = selectedTablesList
+                                  .where((nt) => nt.orders.isNotEmpty)
+                                  .toList();
 
-                              for (var t in toGetPaymentTableList) {
-                                await showDialog(
-                                    context: context,
-                                    builder: (context) => PaymentDialog(
-                                          cardAction: () {
-                                            deleteTable(t.firebaseId);
-
-                                            toGetPaymentTableList.clear();
-                                            Navigator.pop(context);
-                                          },
-                                          table: t,
-                                        ));
-                              }
+                              await showPaymentDialogs(
+                                  toGetPaymentTableList, 0);
 
                               setState(() {
                                 resetBotonSelect();
@@ -229,7 +252,7 @@ class MapaPageState extends State<MapaPage> {
                           },
                           child: const SizedBox(
                             width: 290,
-                            height: 190,
+                            height: 225,
                             child: Align(
                               child: Text(
                                 'COBRAR',
@@ -260,11 +283,11 @@ class MapaPageState extends State<MapaPage> {
                           },
                           child: SizedBox(
                             width: 290,
-                            height: 190,
+                            height: 225,
                             child: Align(
                               child: Text(
                                 textBottonMove,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 35,
                                   color: Colors.black,
                                 ),
@@ -275,44 +298,38 @@ class MapaPageState extends State<MapaPage> {
                         ElevatedButton(
                           style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(
-                                const Color(0xFFB0D5FF)),
+                                const Color.fromARGB(255, 39, 66, 91)),
                           ),
                           onPressed: () {
-                            setState(() {});
+                            if (!canMoveTable && !canSelectTable) {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => SettingsDialog(
+                                        goToLoginPage: () async {
+                                          Navigator.pop(context);
+                                          timer!.cancel();
+                                          widget.goToLoginPage();
+                                        },
+                                        goToBBDDPage: () async {
+                                          Navigator.pop(context);
+                                          timer!.cancel();
+                                          widget.goToBBDDPage();
+                                        },
+                                        goToEmployeesPage: () async {
+                                          Navigator.pop(context);
+                                          timer!.cancel();
+                                          widget.goToEmployeesPage();
+                                        },
+                                      ));
+                            }
                           },
-                          child: const SizedBox(
+                          child: SizedBox(
                             width: 290,
-                            height: 190,
+                            height: 225,
                             child: Align(
-                              child: Text(
-                                'MENU',
-                                style: TextStyle(
-                                  fontSize: 35,
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        ElevatedButton(
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                const Color(0xFF3D8BE7)),
-                          ),
-                          onPressed: () {
-                            resetBotonSelect();
-                            setState(() {});
-                          },
-                          child: const SizedBox(
-                            width: 290,
-                            height: 190,
-                            child: Align(
-                              child: Text(
-                                'EMPLEADOS',
-                                style: TextStyle(
-                                  fontSize: 35,
-                                  color: Colors.black,
-                                ),
+                              child: Image.asset(
+                                'lib/assets/images/settings.png',
+                                height: 170,
                               ),
                             ),
                           ),
@@ -329,99 +346,152 @@ class MapaPageState extends State<MapaPage> {
     );
   }
 
-  Widget buildMesas() {
+  ///This method is responsible for displaying payment dialogs the user.
+  Future<void> showPaymentDialogs(
+      List<CustomTable> tableList, int currentIndex) async {
+    if (currentIndex >= tableList.length) {
+      showDialog(
+        context: context,
+        builder: (context) => const ByeDialog(),
+      );
+      toGetPaymentTableList.clear();
+      return;
+    }
+
+    var t = tableList[currentIndex];
+    await showDialog(
+      context: context,
+      builder: (context) => PaymentDialog(
+        table: t,
+        cardAction: () async {
+          await updateTable(t, 'cobrada');
+
+          setState(() {
+            Navigator.pop(context);
+          });
+          await closeTable(
+            t,
+          );
+          await showPaymentDialogs(tableList, currentIndex + 1);
+        },
+        cashAction: () async {
+          Navigator.pop(context);
+          await showDialog(
+            context: context,
+            builder: (BuildContext context) => CashDialog(
+              table: t,
+              cobrarAction: () async {
+                await updateTable(t, 'cobrada');
+
+                setState(() {
+                  Navigator.pop(context);
+                });
+                await closeTable(
+                  t,
+                );
+                await showPaymentDialogs(tableList, currentIndex + 1);
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// A method that builds the table map UI.
+  Widget buildPositionTables() {
     return Stack(
       children: [
         //PRIMERA FILA
         Positioned(
           top: 70,
           left: 50,
-          child: buildMesaSigle(5),
+          child: buildSingleTable(5),
         ),
         Positioned(
           top: 70,
           left: 300,
-          child: buildMesaSigle(6),
+          child: buildSingleTable(6),
         ),
         Positioned(
           top: 70,
           left: 550,
-          child: buildMesaSigle(7),
+          child: buildSingleTable(7),
         ),
 
         //SEGUNDA FILA
         Positioned(
           top: 320,
           left: 50,
-          child: buildMesaSigle(8),
+          child: buildSingleTable(8),
         ),
         Positioned(
           top: 320,
           left: 300,
-          child: buildMesaSigle(9),
+          child: buildSingleTable(9),
         ),
         Positioned(
           top: 320,
           left: 550,
-          child: buildMesaSigle(10),
+          child: buildSingleTable(10),
         ),
 
         //TERCERA FILA
         Positioned(
           top: 570,
           left: 50,
-          child: buildMesaDoble(11),
+          child: buildDoubleTable(11),
         ),
         Positioned(
           top: 570,
           left: 475,
-          child: buildMesaSigle(12),
+          child: buildSingleTable(12),
         ),
 
         //CUARTA FILA
         Positioned(
           top: 820,
           left: 50,
-          child: buildMesaDoble(13),
+          child: buildDoubleTable(13),
         ),
         Positioned(
           top: 820,
           left: 475,
-          child: buildMesaSigle(14),
+          child: buildSingleTable(14),
         ),
 
         //QUINTA FILA
         Positioned(
           top: 1070,
           left: 50,
-          child: buildMesaDoble(15),
+          child: buildDoubleTable(15),
         ),
         Positioned(
           top: 1070,
           left: 475,
-          child: buildMesaSigle(16),
+          child: buildSingleTable(16),
         ),
 
         //BANQUETAS
         Positioned(
           top: 650,
           left: 825,
-          child: buildMesaBanqueta(1),
+          child: buildCircleChair(1),
         ),
         Positioned(
           top: 800,
           left: 825,
-          child: buildMesaBanqueta(2),
+          child: buildCircleChair(2),
         ),
         Positioned(
           top: 950,
           left: 825,
-          child: buildMesaBanqueta(3),
+          child: buildCircleChair(3),
         ),
         Positioned(
           top: 1100,
           left: 825,
-          child: buildMesaBanqueta(4),
+          child: buildCircleChair(4),
         ),
 
         // ----------- TERRAZA --------------
@@ -429,66 +499,67 @@ class MapaPageState extends State<MapaPage> {
         Positioned(
           top: 70,
           left: 1200,
-          child: buildMesaSigle(17),
+          child: buildSingleTable(17),
         ),
         Positioned(
           top: 70,
           left: 1450,
-          child: buildMesaSigle(22),
+          child: buildSingleTable(22),
         ),
 
         //SEGUNDA FILA
         Positioned(
           top: 320,
           left: 1200,
-          child: buildMesaSigle(18),
+          child: buildSingleTable(18),
         ),
         Positioned(
           top: 320,
           left: 1450,
-          child: buildMesaSigle(23),
+          child: buildSingleTable(23),
         ),
 
         //TERCERA FILA
         Positioned(
           top: 570,
           left: 1200,
-          child: buildMesaSigle(19),
+          child: buildSingleTable(19),
         ),
         Positioned(
           top: 570,
           left: 1450,
-          child: buildMesaSigle(24),
+          child: buildSingleTable(24),
         ),
 
         //CUARTA FILA
         Positioned(
           top: 820,
           left: 1200,
-          child: buildMesaSigle(20),
+          child: buildSingleTable(20),
         ),
         Positioned(
           top: 820,
           left: 1450,
-          child: buildMesaSigle(25),
+          child: buildSingleTable(25),
         ),
 
         //QUINTA FILA
         Positioned(
           top: 1070,
           left: 1200,
-          child: buildMesaSigle(21),
+          child: buildSingleTable(21),
         ),
         Positioned(
           top: 1070,
           left: 1450,
-          child: buildMesaSigle(26),
+          child: buildSingleTable(26),
         ),
       ],
     );
   }
 
-  Widget buildMesaSigle(int number) {
+  /// A method that builds a single table widget.
+  Widget buildSingleTable(int number) {
     Color colorMesa = const Color(0xFF5DDAAD);
     CustomTable? table;
 
@@ -522,7 +593,6 @@ class MapaPageState extends State<MapaPage> {
 
         return GestureDetector(
           onTap: () {
-            setState(() {});
             if (canMoveTable && canSelectTable) {
               String opcionalText = '';
               if (table!.orders.isNotEmpty) {
@@ -555,11 +625,10 @@ class MapaPageState extends State<MapaPage> {
                 colorMesa = const Color(0xFF5DDAAD);
               } else {
                 selectedTablesList.add(table!);
-                print(selectedTablesList);
               }
             } else {
               timer!.cancel();
-              widget.goToOrdersPage(table!);
+              widget.goToOrderPage(table!);
             }
           },
           child: Container(
@@ -590,7 +659,8 @@ class MapaPageState extends State<MapaPage> {
     );
   }
 
-  Widget buildMesaDoble(int number) {
+  /// A method that builds a double table widget.
+  Widget buildDoubleTable(int number) {
     Color colorMesa = const Color(0xFF5DDAAD);
     CustomTable? table;
     return FutureBuilder<CustomTable?>(
@@ -651,13 +721,8 @@ class MapaPageState extends State<MapaPage> {
               }
             } else {
               timer!.cancel();
-              widget.goToOrdersPage(table!);
+              widget.goToOrderPage(table!);
             }
-          },
-          onLongPress: () {
-            setState(() {
-              colorMesa == const Color.fromRGBO(58, 0, 138, 1);
-            });
           },
           child: Container(
             width: 300,
@@ -685,7 +750,8 @@ class MapaPageState extends State<MapaPage> {
     );
   }
 
-  Widget buildMesaBanqueta(int number) {
+  /// A method that builds a cirlce chair widget.
+  Widget buildCircleChair(int number) {
     Color colorMesa = const Color(0xFF5DDAAD);
     CustomTable? table;
     return FutureBuilder<CustomTable?>(
@@ -746,13 +812,8 @@ class MapaPageState extends State<MapaPage> {
               }
             } else {
               timer!.cancel();
-              widget.goToOrdersPage(table!);
+              widget.goToOrderPage(table!);
             }
-
-            // Acción al hacer clic en la mesa
-          },
-          onLongPress: () {
-            setState(() {});
           },
           child: Container(
             width: 90,
@@ -777,6 +838,9 @@ class MapaPageState extends State<MapaPage> {
     );
   }
 
+  /// This method checks if the specified table is currently busy.
+  /// It examines the status field of the table object and returns true if the
+  /// status is set to busy.
   bool isBusy(CustomTable t) {
     if (t.orders.isNotEmpty &&
         !selectedTablesList.any((nt) => nt.id == t.id) &&
@@ -787,6 +851,9 @@ class MapaPageState extends State<MapaPage> {
     }
   }
 
+  /// This method checks if the specified table is currently available or free.
+  ///  It examines the status field of the table object and returns true if the
+  ///  status is set to "free", indicating that the table is available for use.
   bool isFree(CustomTable t) {
     if (!billedOutTableList.any((nt) =>
         nt.id == t.id &&
@@ -798,9 +865,12 @@ class MapaPageState extends State<MapaPage> {
     }
   }
 
+  /// This method checks if a specific CustomTable is billed out. It checks if
+  /// the given table is present in the billedOutTableList, which contains
+  /// tables that have been billed out.
   bool isBilledOut(CustomTable t) {
     if (t.orders.isNotEmpty &&
-        billedOutTableList.any((nt) => nt.id == t.id) &&
+        t.isBilledOut == 'true' &&
         !selectedTablesList.any((nt) => nt.id == t.id)) {
       return true;
     } else {
@@ -808,6 +878,9 @@ class MapaPageState extends State<MapaPage> {
     }
   }
 
+  /// This method checks if a specific CustomTable is selected. It iterates over
+  /// the selectedTablesList and compares the IDs of the tables to determine if
+  ///  the given table is selected.
   bool isSelected(CustomTable t) {
     if (selectedTablesList.any((nt) => nt.id == t.id)) {
       return true;
@@ -816,6 +889,8 @@ class MapaPageState extends State<MapaPage> {
     }
   }
 
+  /// This method resets the state and text of the "SELECCIONAR" button.
+  /// It clears the selectedTablesList and sets the canSelectTable flag to false.
   void resetBotonSelect() {
     if (textBottonSelec == 'SELECCIONAR') {
       textBottonSelec = 'DESELECCIONAR';
@@ -827,6 +902,8 @@ class MapaPageState extends State<MapaPage> {
     }
   }
 
+  /// This method resets the state and text of the "MOVER" button. It clears the
+  /// selectedTablesList and sets the canMoveTable flag to false.
   void resetBotonMove() {
     if (textBottonMove == 'MOVER') {
       textBottonMove = 'NO MOVER';
@@ -837,14 +914,19 @@ class MapaPageState extends State<MapaPage> {
     }
   }
 
+  /// This method reloads the state of the widget. It fetches the latest table
+  /// data from the database and updates the UI accordingly.
   void reload() {
     timer = Timer.periodic(const Duration(seconds: 5), (timer) {
       setState(() {
-        buildMesas();
+        buildPositionTables();
       });
     });
   }
 
+  /// This method returns the total number of tables in the map. It calculates
+  /// the count by accessing the tablesList and counting the number of elements
+  /// in the list.
   String obtainTablesNumber() {
     String tablesNumber = "";
     for (var t in selectedTablesList) {
@@ -853,6 +935,9 @@ class MapaPageState extends State<MapaPage> {
     return tablesNumber;
   }
 
+  /// This method displays a warning dialog to the user when an action is
+  /// performed without selecting any tables. It informs the user to select
+  /// at least one table before proceeding.
   Future<void> showWarningDialog() async {
     await showDialog(
         context: context,
@@ -860,7 +945,6 @@ class MapaPageState extends State<MapaPage> {
               closeAction: () {
                 Navigator.pop(context);
               },
-              texto1: "CUIDADO JEFE,\n NO HA SELECCIONADO NINGUNA MESA",
             ));
   }
 }
